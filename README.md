@@ -4,6 +4,12 @@ CursusLink est une plateforme de Learning Management System (LMS) gamifiée et d
 
 Vidéo de présentation : https://youtu.be/wPtc6BR6XiM
 
+Galerie: 
+
+<img width="2512" height="1404" alt="2" src="https://github.com/user-attachments/assets/60385870-529e-42c3-9da8-5c6093097263" />
+<img width="2505" height="1403" alt="3" src="https://github.com/user-attachments/assets/0432e29b-18cb-4297-a073-e7392059703b" />
+<img width="2505" height="1396" alt="5" src="https://github.com/user-attachments/assets/615af091-8d8c-4681-9714-0326f1891bc4" />
+
 > **Note :** Ce dépôt contient la **Public Edition** de CursusLink. Ce dépôt a principalement pour but de montrer le code source (portfolio).
 
 🌍 **App complète :** L'application complète et fonctionnelle est accessible et utilisée en production sur **[cursuslink.app](https://cursuslink.app)**. 
