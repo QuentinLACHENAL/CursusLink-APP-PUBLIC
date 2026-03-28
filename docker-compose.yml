@@ -1,0 +1,108 @@
+# IMPORTANT: Copier .env.docker.example vers .env et modifier les secrets avant de lancer !
+# docker-compose --env-file .env up -d
+
+services:
+  # API NestJS
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: cursus_api
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: [DB_USERNAME]
+      DB_PASSWORD: [DB_PASSWORD]
+      DB_NAME: cursuslink_db
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: [NEO4J_USERNAME]
+      NEO4J_PASSWORD: [NEO4J_PASSWORD]
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: [JWT_SECRET]
+      PORT: 3000
+      NODE_ENV: development
+      CORS_ORIGIN: '*'
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run start:dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Base de données SQL (Utilisateurs, Auth)
+  postgres:
+    image: postgres:15-alpine
+    container_name: cursus_postgres
+    environment:
+      POSTGRES_USER: [DB_USERNAME]
+      POSTGRES_PASSWORD: [DB_PASSWORD]
+      POSTGRES_DB: cursuslink_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U [DB_USERNAME] -d cursuslink_db"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # Base de données Graphe (Spherier, Compétences)
+  neo4j:
+    image: neo4j:5.12
+    container_name: cursus_neo4j
+    environment:
+      NEO4J_AUTH: [NEO4J_USERNAME]/[NEO4J_PASSWORD]
+      NEO4J_dbms_default__listen__address: 0.0.0.0
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./data/neo4j:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Cache et Files d'attente
+  redis:
+    image: redis:alpine
+    container_name: cursus_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Interface graphique pour visualiser Postgres (Optionnel)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cursus_pgadmin
+    profiles:
+      - tools
+    environment:
+      PGADMIN_DEFAULT_EMAIL: [ADMIN_EMAIL]
+      PGADMIN_DEFAULT_PASSWORD: [ADMIN_PASSWORD]
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres

@@ -1,0 +1,25 @@
+# Dépendances
+node_modules/
+
+# Build NestJS
+dist/
+*.tsbuildinfo
+
+# Build Next.js
+.next/
+out/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Environment variables (SECRETS - NE JAMAIS PUSH)
+.env
+.env.local
+.env.*.local
+
+# Docker Data (Ne pas versionner la base de données binaire)
+data/
